@@ -16,7 +16,7 @@ pipeline {
         stage('Initializing Terraform'){
             steps{
                 script{
-                    dir('EKS'){
+                    dir('mono-eks-cluster'){
                         sh 'terraform init'
                     }
                 }
@@ -25,7 +25,7 @@ pipeline {
         stage('Formatting Terraform Code'){
             steps{
                 script{
-                    dir('EKS'){
+                    dir('mono-eks-cluster'){
                         sh 'terraform fmt'
                     }
                 }
@@ -34,7 +34,7 @@ pipeline {
         stage('Validating Terraform'){
             steps{
                 script{
-                    dir('EKS'){
+                    dir('mono-eks-cluster'){
                         sh 'terraform validate'
                     }
                 }
@@ -43,7 +43,7 @@ pipeline {
         stage('Previewing the Infra using Terraform'){
             steps{
                 script{
-                    dir('EKS'){
+                    dir('mono-eks-cluster'){
                         sh 'terraform plan'
                     }
                     input(message: "Are you sure to proceed?", ok: "Proceed")
@@ -53,7 +53,7 @@ pipeline {
         stage('Creating/Destroying an EKS Cluster'){
             steps{
                 script{
-                    dir('EKS') {
+                    dir('mono-eks-cluster') {
                         sh 'terraform $action --auto-approve'
                     }
                 }
