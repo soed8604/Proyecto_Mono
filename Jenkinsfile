@@ -70,12 +70,12 @@ pipeline {
         //         }
         //     }
         // }
-        post {
-            success {
-                slackSend channel: '#canal-slack', message: 'Deploy del clúster EKS exitoso.'
-            }
-            failure {
-                slackSend channel: '#canal-slack', message: 'El despliegue del clúster EKS ha fallado.'
+    post {
+        success {
+            slackSend channel: '#canal-slack', message: 'Deploy del clúster EKS exitoso.'
+        }
+        failure {
+            slackSend channel: '#canal-slack', message: 'El despliegue del clúster EKS ha fallado.'
         }
     }
 
