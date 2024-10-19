@@ -13,7 +13,7 @@ pipeline {
                 }
             }
         }
-        stage('Initializing Terraform'){
+        stage('Inicializar terraform'){
             steps{
                 script{
                     dir('mono-eks-cluster'){
@@ -22,7 +22,7 @@ pipeline {
                 }
             }
         }
-        stage('Formatting Terraform Code'){
+        stage('Formatear el codigo de terraform'){
             steps{
                 script{
                     dir('mono-eks-cluster'){
@@ -31,7 +31,7 @@ pipeline {
                 }
             }
         }
-        stage('Validating Terraform'){
+        stage('Validar la configuración de terraform'){
             steps{
                 script{
                     dir('mono-eks-cluster'){
@@ -40,7 +40,7 @@ pipeline {
                 }
             }
         }
-        stage('Previewing the Infra using Terraform'){
+        stage('Previsualizar la Infraestructura usando Terraform'){
             steps{
                 script{
                     dir('mono-eks-cluster'){
@@ -50,7 +50,7 @@ pipeline {
                 }
             }
         }
-        stage('Creating/Destroying an EKS Cluster'){
+        stage('Crear/Destruir un EKS Cluster'){
             steps{
                 script{
                     dir('mono-eks-cluster') {
