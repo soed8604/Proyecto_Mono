@@ -46,7 +46,7 @@ pipeline {
                     dir('mono-eks-cluster'){
                         sh 'terraform plan'
                     }
-                    input(message: "Are you sure to proceed?", ok: "Proceed")
+                    input(message: "Estas seguro que quieres proceder", ok: "Proceder")
                 }
             }
         }
@@ -70,5 +70,14 @@ pipeline {
         //         }
         //     }
         // }
+        post {
+            success {
+                slackSend channel: '#canal-slack', message: 'Deploy del clúster EKS exitoso.'
+            }
+            failure {
+                slackSend channel: '#canal-slack', message: 'El despliegue del clúster EKS ha fallado.'
+        }
+    }
+
     }
 }

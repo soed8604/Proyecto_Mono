@@ -12,3 +12,7 @@ variable "public_subnets" {
   description = "Subnets CIDR"
   type        = list(string)
 }
+variable "region" {
+  description = "región"
+  type        = string
+}
