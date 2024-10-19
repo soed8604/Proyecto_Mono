@@ -1,11 +1,31 @@
+def COLOR_MAP = [
+    'SUCCESS': 'good',
+    'FAILURE': 'danger'
+]
+
+// Función para determinar el usuario que ejecutó el build
+def detBuiltUser(){
+    def userId = currentBuild.rawBuild.getCause(Cause.UserIdCause)?.getUserId()
+    return userId ?: 'Usuario desconocido'
+}
+
 pipeline {
     agent any
     environment {
         AWS_ACCESS_KEY_ID = credentials('AWS_ACCESS_KEY_ID')
         AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
         AWS_DEFAULT_REGION = "us-east-1"
+        BUILD_USER = '' // Inicializamos la variable, se asignará después
     }
     stages {
+        stage('Set Build User') {
+            steps {
+                script {
+                    // Asignar el valor del usuario que ejecutó el build
+                    env.BUILD_USER = detBuiltUser()
+                }
+            }
+        }
         stage('Checkout SCM'){
             steps{
                 script{
@@ -22,7 +42,7 @@ pipeline {
                 }
             }
         }
-        stage('Formatear el codigo de terraform'){
+        stage('Formatear el código de terraform'){
             steps{
                 script{
                     dir('mono-eks-cluster'){
@@ -46,7 +66,7 @@ pipeline {
                     dir('mono-eks-cluster'){
                         sh 'terraform plan'
                     }
-                    input(message: "Estas seguro que quieres proceder", ok: "Proceder")
+                    input(message: "¿Estás seguro de proceder?", ok: "proceder")
                 }
             }
         }
@@ -54,11 +74,12 @@ pipeline {
             steps{
                 script{
                     dir('mono-eks-cluster') {
-                        sh 'terraform $action --auto-approve'
+                        sh 'terraform $action --auto-approve'  // Asegúrate de definir 'action'
                     }
                 }
             }
         }
+        // Opcional: Desplegar una aplicación Nginx en EKS
         // stage('Deploying Nginx Application') {
         //     steps{
         //         script{
@@ -70,14 +91,30 @@ pipeline {
         //         }
         //     }
         // }
-    post {
-        success {
-            slackSend channel: '#canal-slack', message: 'Deploy del clúster EKS exitoso.'
-        }
-        failure {
-            slackSend channel: '#canal-slack', message: 'El despliegue del clúster EKS ha fallado.'
-        }
     }
 
+    post {
+        success {
+            slackSend (
+                channel: '#mono-notifications', 
+                color: COLOR_MAP['SUCCESS'],
+                message: """✅ Deploy del clúster EKS fue exitoso.
+                Job: ${env.JOB_NAME}
+                Build: ${env.BUILD_NUMBER}
+                Iniciado por: ${env.BUILD_USER}
+                Para más información, visita: ${env.BUILD_URL}"""
+            )
+        }
+        failure {
+            slackSend (
+                channel: '#mono-notifications', 
+                color: COLOR_MAP['FAILURE'],
+                message: """❌ Deploy del clúster EKS falló.
+                Job: ${env.JOB_NAME}
+                Build: ${env.BUILD_NUMBER}
+                Iniciado por: ${env.BUILD_USER}
+                Para más información, visita: ${env.BUILD_URL}"""
+            )
+        }
     }
 }
