@@ -90,14 +90,18 @@ pipeline {
             )
         }
         failure {
-            slackSend (
-                channel: '#mono-notifications', 
-                color: COLOR_MAP['FAILURE'],
-                message: """❌ Deploy del cluster EKS fallo.
-                Job: ${env.JOB_NAME}
-                Build: ${env.BUILD_NUMBER}
-                Causa del fallo: ${failureMessage}
-                Para mas informacion, visita: ${env.BUILD_URL}"""
+            script {
+                def cause = currentBuild.rawBuild.getCause(Cause)
+                def failureMessage = cause ? cause.getMessage() : 'Sin información de fallo.'
+
+                slackSend (
+                    channel: '#mono-notifications', 
+                    color: COLOR_MAP['FAILURE'],
+                    message: """❌ Deploy del cluster EKS fallo.
+                    Job: ${env.JOB_NAME}
+                    Build: ${env.BUILD_NUMBER}
+                    Causa del fallo: ${failureMessage}
+                    Para mas informacion, visita: ${env.BUILD_URL}"""
             )
         }
     }
