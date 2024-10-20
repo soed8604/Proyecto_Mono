@@ -3,12 +3,6 @@ def COLOR_MAP = [
     'FAILURE': 'danger'
 ]
 
-// Función para obtener el usuario que inició el build
-def getBuildUser() {
-    def userIdCause = currentBuild.getCause(Cause.UserIdCause)
-    return userIdCause ? userIdCause.getUserId() : 'Usuario desconocido'
-}
-
 pipeline {
     agent any
     environment {
@@ -17,14 +11,6 @@ pipeline {
         AWS_DEFAULT_REGION = "us-east-1"
     }
     stages {
-        stage('Setear el usuario que ejecuta el job') {
-            steps {
-                script {
-                    // Asignar el valor del usuario que ejecutó el build
-                    env.BUILD_USER = getBuildUser()
-                }
-            }
-        }
         stage('Checkout SCM'){
             steps{
                 script{
@@ -100,7 +86,6 @@ pipeline {
                 message: """✅ Deploy del cluster EKS fue exitoso.
                 Job: ${env.JOB_NAME}
                 Build: ${env.BUILD_NUMBER}
-                Iniciado por: ${env.BUILD_USER}
                 Para más información, visita: ${env.BUILD_URL}"""
             )
         }
@@ -111,7 +96,6 @@ pipeline {
                 message: """❌ Deploy del cluster EKS fallo.
                 Job: ${env.JOB_NAME}
                 Build: ${env.BUILD_NUMBER}
-                Iniciado por: ${env.BUILD_USER}
                 Para mas informacion, visita: ${env.BUILD_URL}"""
             )
         }
