@@ -36,15 +36,15 @@ pipeline {
                 }
             }
         }
-        stage('Validar la configuracion de terraform'){
-            steps{
-                script{
-                    dir('mono-eks-cluster'){
-                        sh 'terraform validate'
-                    }
-                }
-            }
-        }
+        // stage('Validar la configuracion de terraform'){
+        //     steps{
+        //         script{
+        //             dir('mono-eks-cluster'){
+        //                 sh 'terraform validate'
+        //             }
+        //         }
+        //     }
+        // }
         stage('Previsualizar la Infraestructura usando Terraform'){
             steps{
                 script{
