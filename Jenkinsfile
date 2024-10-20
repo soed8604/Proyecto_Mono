@@ -36,15 +36,15 @@ pipeline {
                 }
             }
         }
-        // stage('Validar la configuracion de terraform'){
-        //     steps{
-        //         script{
-        //             dir('mono-eks-cluster'){
-        //                 sh 'terraform validate'
-        //             }
-        //         }
-        //     }
-        // }
+         stage('Validar la configuracion de terraform'){
+             steps{
+                 script{
+                    dir('mono-eks-cluster'){
+                         sh 'terraform validate'
+                    }
+                }
+            }
+        }
         stage('Previsualizar la Infraestructura usando Terraform'){
             steps{
                 script{
@@ -83,20 +83,20 @@ pipeline {
             slackSend (
                 channel: '#mono-notifications',
                 color: COLOR_MAP['SUCCESS'],
-                message: """✅ Deploy del clúster EKS fue exitoso.
+                message: """✅ Deploy del cluster EKS fue exitoso.
                 Job: ${env.JOB_NAME}
                 Build: ${env.BUILD_NUMBER}
-                Para más información, visita: ${env.BUILD_URL}"""
+                Para mas informacion, visita: ${env.BUILD_URL}"""
             )
         }
         failure {
             slackSend (
                 channel: '#mono-notifications',
                 color: COLOR_MAP['FAILURE'],
-                message: """❌ Deploy del clúster EKS falló.
+                message: """❌ Deploy del cluster EKS fallo.
                 Job: ${env.JOB_NAME}
                 Build: ${env.BUILD_NUMBER}
-                Para más información, visita: ${env.BUILD_URL}"""
+                Para mas informacion, visita: ${env.BUILD_URL}"""
             )
         }
     }
