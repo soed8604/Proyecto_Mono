@@ -96,6 +96,7 @@ pipeline {
                 message: """❌ Deploy del cluster EKS fallo.
                 Job: ${env.JOB_NAME}
                 Build: ${env.BUILD_NUMBER}
+                Causa del fallo: ${failureMessage}
                 Para mas informacion, visita: ${env.BUILD_URL}"""
             )
         }
