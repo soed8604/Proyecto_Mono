@@ -3,10 +3,10 @@ def COLOR_MAP = [
     'FAILURE': 'danger'
 ]
 
-// Función para determinar el usuario que ejecutó el build
-def detBuiltUser(){
-    def userId = currentBuild.rawBuild.getCause(Cause.UserIdCause)?.getUserId()
-    return userId ?: 'Usuario desconocido'
+// Función para obtener el usuario que inició el build
+def getBuildUser() {
+    def userIdCause = currentBuild.rawBuild.getCause(Cause.UserIdCause)
+    return userIdCause ? userIdCause.getUserId() : 'Usuario desconocido'
 }
 
 pipeline {
@@ -98,7 +98,7 @@ pipeline {
             slackSend (
                 channel: '#mono-notifications', 
                 color: COLOR_MAP['SUCCESS'],
-                message: """✅ Deploy del clúster EKS fue exitoso.
+                message: """✅ Deploy del cluster EKS fue exitoso.
                 Job: ${env.JOB_NAME}
                 Build: ${env.BUILD_NUMBER}
                 Iniciado por: ${env.BUILD_USER}
@@ -109,11 +109,11 @@ pipeline {
             slackSend (
                 channel: '#mono-notifications', 
                 color: COLOR_MAP['FAILURE'],
-                message: """❌ Deploy del clúster EKS falló.
+                message: """❌ Deploy del cluster EKS fallo.
                 Job: ${env.JOB_NAME}
                 Build: ${env.BUILD_NUMBER}
                 Iniciado por: ${env.BUILD_USER}
-                Para más información, visita: ${env.BUILD_URL}"""
+                Para mas informacion, visita: ${env.BUILD_URL}"""
             )
         }
     }
