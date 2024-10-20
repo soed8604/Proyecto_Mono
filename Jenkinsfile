@@ -15,14 +15,13 @@ pipeline {
         AWS_ACCESS_KEY_ID = credentials('AWS_ACCESS_KEY_ID')
         AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
         AWS_DEFAULT_REGION = "us-east-1"
-        BUILD_USER = '' // Inicializamos la variable, se asignará después
     }
     stages {
-        stage('Set Build User') {
+        stage('Setear el usuario que ejecuta el job') {
             steps {
                 script {
                     // Asignar el valor del usuario que ejecutó el build
-                    env.BUILD_USER = detBuiltUser()
+                    env.BUILD_USER = getBuildUser()
                 }
             }
         }
