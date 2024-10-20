@@ -5,7 +5,7 @@ def COLOR_MAP = [
 
 // Función para obtener el usuario que inició el build
 def getBuildUser() {
-    def userIdCause = currentBuild.rawBuild.getCause(Cause.UserIdCause)
+    def userIdCause = currentBuild.getCause(Cause.UserIdCause)
     return userIdCause ? userIdCause.getUserId() : 'Usuario desconocido'
 }
 
@@ -41,7 +41,7 @@ pipeline {
                 }
             }
         }
-        stage('Formatear el código de terraform'){
+        stage('Formatear el codigo de terraform'){
             steps{
                 script{
                     dir('mono-eks-cluster'){
@@ -50,7 +50,7 @@ pipeline {
                 }
             }
         }
-        stage('Validar la configuración de terraform'){
+        stage('Validar la configuracion de terraform'){
             steps{
                 script{
                     dir('mono-eks-cluster'){
