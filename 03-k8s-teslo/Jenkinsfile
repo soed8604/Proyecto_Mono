@@ -19,6 +19,47 @@ pipeline {
                 }
             }
         }
+        stage('Install Dependencies') {
+            steps {
+                script {
+                    // Verificar y actualizar kubectl si es necesario
+                    sh '''
+                    KUBECTL_VERSION=$(kubectl version --client --short | grep -oP '(?<=v)[0-9]+\\.[0-9]+\\.[0-9]+')
+                    REQUIRED_KUBECTL_VERSION="1.30.0"
+                    if [ "$(printf '%s\n' "$REQUIRED_KUBECTL_VERSION" "$KUBECTL_VERSION" | sort -V | head -n1)" != "$REQUIRED_KUBECTL_VERSION" ]; then
+                        echo "Installing/Updating kubectl..."
+                        curl -LO "https://dl.k8s.io/release/v$REQUIRED_KUBECTL_VERSION/bin/linux/amd64/kubectl"
+                        chmod +x ./kubectl
+                        sudo mv ./kubectl /usr/local/bin/kubectl
+                    fi
+                    '''
+
+                    // Verificar y actualizar aws-iam-authenticator si es necesario
+                    sh '''
+                    AUTH_VERSION=$(aws-iam-authenticator version 2>&1 | grep -oP '(?<=Version: )[0-9]+\\.[0-9]+\\.[0-9]+')
+                    REQUIRED_AUTH_VERSION="1.18.9"
+                    if [ "$(printf '%s\n' "$REQUIRED_AUTH_VERSION" "$AUTH_VERSION" | sort -V | head -n1)" != "$REQUIRED_AUTH_VERSION" ]; then
+                        echo "Installing/Updating aws-iam-authenticator..."
+                        curl -o aws-iam-authenticator https://amazon-eks.s3.us-west-2.amazonaws.com/1.18.9/2020-11-02/bin/linux/amd64/aws-iam-authenticator
+                        chmod +x ./aws-iam-authenticator
+                        sudo mv aws-iam-authenticator /usr/local/bin/aws-iam-authenticator
+                    fi
+                    '''
+
+                    // Verificar y actualizar AWS CLI si es necesario
+                    sh '''
+                    AWS_CLI_VERSION=$(aws --version 2>&1 | grep -oP '(?<=aws-cli/)[0-9]+\\.[0-9]+\\.[0-9]+')
+                    REQUIRED_AWS_CLI_VERSION="2.0.0"
+                    if [ "$(printf '%s\n' "$REQUIRED_AWS_CLI_VERSION" "$AWS_CLI_VERSION" | sort -V | head -n1)" != "$REQUIRED_AWS_CLI_VERSION" ]; then
+                        echo "Installing/Updating AWS CLI..."
+                        curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+                        unzip awscliv2.zip
+                        sudo ./aws/install
+                    fi
+                    '''
+                }
+            }
+        }
         stage('Update kubeconfig') {
             steps {
                 script {
@@ -37,7 +78,6 @@ pipeline {
                     dir('03-k8s-teslo') {
                         // Configurar kubectl para el clúster de EKS
                         sh 'aws eks update-kubeconfig --name mono-eks-cluster'
-
                         // Aplicar manifiestos de Kubernetes
                         sh 'kubectl apply -f postgres-config.yaml'
                         sh 'kubectl apply -f postgres-secret.yaml'
