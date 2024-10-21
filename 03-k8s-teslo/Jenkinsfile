@@ -1,0 +1,70 @@
+def COLOR_MAP = [
+    'SUCCESS': 'good',
+    'FAILURE': 'danger'
+]
+
+pipeline {
+    agent any
+    environment {
+        AWS_ACCESS_KEY_ID = credentials('AWS_ACCESS_KEY_ID')
+        AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
+        AWS_DEFAULT_REGION = "us-east-1"
+    }
+
+    stages {
+        stage('Checkout SCM') {
+            steps {
+                script {
+                    checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/soed8604/Proyecto_Mono.git']])
+                }
+            }
+        }
+        
+        stage('Deployar mi API Application') {
+            steps {
+                script {
+                    dir('03-k8s-teslo') {
+                        // Configurar kubectl para el clúster de EKS
+                        sh 'aws eks update-kubeconfig --name mono-eks-cluster'
+
+                        // Aplicar manifiestos de Kubernetes
+                        sh 'kubectl apply -f postgres-config.yaml'
+                        sh 'kubectl apply -f postgres-secret.yaml'
+                        sh 'kubectl apply -f postgres.yaml'
+                        sh 'kubectl apply -f pg-admin-secrets.yaml'
+                        sh 'kubectl apply -f pg-admin.yaml'
+                        sh 'kubectl apply -f backend-secrets.yaml'
+                        sh 'kubectl apply -f backend-app.yaml'
+
+                        // Verificar el estado de los despliegues
+                        sh 'kubectl rollout status deployment/backend-app'
+                        sh 'kubectl rollout status deployment/pg-admin'
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            slackSend (
+                channel: '#mono-notifications',
+                color: COLOR_MAP['SUCCESS'],
+                message: """✅ Deploy de mi aplicación exitoso.
+                Job: ${env.JOB_NAME}
+                Build: ${env.BUILD_NUMBER}
+                Para más información, visita: ${env.BUILD_URL}"""
+            )
+        }
+        failure {
+            slackSend (
+                channel: '#mono-notifications',
+                color: COLOR_MAP['FAILURE'],
+                message: """❌ El despliegue de mi aplicación falló.
+                Job: ${env.JOB_NAME}
+                Build: ${env.BUILD_NUMBER}
+                Para más información, visita: ${env.BUILD_URL}"""
+            )
+        }
+    }
+}
