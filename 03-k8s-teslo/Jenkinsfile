@@ -19,6 +19,17 @@ pipeline {
                 }
             }
         }
+        stage('Update kubeconfig') {
+            steps {
+                script {
+                    // Actualiza el kubeconfig con AWS EKS
+                    sh 'aws eks update-kubeconfig --name mono-eks-cluster'
+                    
+                    // Reemplaza la apiVersion en el kubeconfig
+                    sh "sed -i 's/client.authentication.k8s.io\\/v1alpha1/client.authentication.k8s.io\\/v1beta1/g' /var/lib/jenkins/.kube/config"
+                }
+            }
+        }
         
         stage('Deployar mi API Application') {
             steps {
